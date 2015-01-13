@@ -50,10 +50,10 @@ namespace replicator_axis_offsets{
 	const static uint32_t DUAL_Y_OFFSET_STEPS   =  6643L;
 	const static uint32_t SINGLE_Y_OFFSET_STEPS =  6377L;
 #else
-	const static uint32_t DUAL_X_OFFSET_STEPS   = 14309L;
-        const static uint32_t SINGLE_X_OFFSET_STEPS = 14309L;
-	const static uint32_t DUAL_Y_OFFSET_STEPS   =  7060L;
-	const static uint32_t SINGLE_Y_OFFSET_STEPS =  6778L;
+	const static uint32_t DUAL_X_OFFSET_STEPS   = 13230L;
+        const static uint32_t SINGLE_X_OFFSET_STEPS = 13230L;
+	const static uint32_t DUAL_Y_OFFSET_STEPS   =  5940L;
+	const static uint32_t SINGLE_Y_OFFSET_STEPS =  5940L;
 #endif
 	/// Footnote:
 	/// mm offsets
@@ -74,7 +74,7 @@ namespace replicator_axis_lengths{
 	// Each one is the length(in mm's) * steps_per_mm  (from the xml file and the result is rounded down)
 #ifdef MODEL_REPLICATOR
     // Replicator 1
-    const static uint32_t axis_lengths[5] = {227L, 148L, 150L, 100000L, 100000L};
+    const static uint32_t axis_lengths[5] = {230L, 150L, 140L, 100000L, 100000L};
 #else
 #ifdef SINGLE_EXTRUDER
     // Replicator 2
@@ -90,14 +90,14 @@ namespace replicator_axis_max_feedrates{
 	// These are the maximum feedrates of all axis, and are populated from Replicator G
 	// on connection.  These are reasonable defaults for X/Y/Z/A/B
 	// Each one is the feedrate in mm per minute (extruders are the feedrate of the input filament)
-	const static uint32_t axis_max_feedrates[5] = {18000, 18000, 1170, 1600, 1600};
+	const static uint32_t axis_max_feedrates[5] = {18000, 18000, 500, 1600, 1600};
 }
 
 namespace replicator_axis_steps_per_mm{
 #ifdef MODEL_REPLICATOR2
 	const static uint32_t axis_steps_per_mm[5] = { 88573186, 88573186, 400000000, 96275202, 96275202};
 #else
-	const static uint32_t axis_steps_per_mm[5] = { 94139704, 94139704, 400000000, 96275202, 96275202};
+	const static uint32_t axis_steps_per_mm[5] = { 92500000, 92500000, 1600000000, 88000000, 88000000};
 #endif
 
 	/// Footnote:
@@ -262,8 +262,15 @@ const static uint16_t BOTSTEP_TYPE      = 0x0208;
 //$type:BBB
 const static uint16_t HEATER_CALIBRATION = 0x020A;
 
+const static uint16_t STEPPER_X_CURRENT		= 0x020B;
+const static uint16_t STEPPER_Y_CURRENT         = 0x020C;
+const static uint16_t STEPPER_Z_CURRENT         = 0x020D;
+const static uint16_t STEPPER_A_CURRENT         = 0x020E;
+const static uint16_t STEPPER_B_CURRENT         = 0x020F;
+const static uint16_t COOL_PLAT			= 0x0210;
+
 /// start of free space
-const static uint16_t FREE_EEPROM_STARTS        = 0x020B;
+const static uint16_t FREE_EEPROM_STARTS        = 0x0211;
 
 
 
@@ -299,8 +306,8 @@ const static uint16_t DITTO_PRINT_ENABLED       = 0x0FFF;
 } 
 
 #define DEFAULT_OVERRIDE_GCODE_TEMP     0
-#define DEFAULT_PREHEAT_TEMP            230
-#define DEFAULT_PREHEAT_HBP             100
+#define DEFAULT_PREHEAT_TEMP            220
+#define DEFAULT_PREHEAT_HBP             85
 #define DEFAULT_HEAT_DURING_PAUSE       0
 
 #define DEFAULT_MAX_ACCELERATION_AXIS_X 1000
@@ -426,7 +433,7 @@ enum HeatMask{
 namespace eeprom_info {
 
 const static uint16_t EEPROM_SIZE = 0x0200;
-const int MAX_MACHINE_NAME_LEN = 16;
+const int MAX_MACHINE_NAME_LEN = 17;
 
 
 /**

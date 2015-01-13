@@ -677,11 +677,12 @@ char* getMachineName() {
 
 	// If EEPROM is zero, load in a default. The 0 is there on purpose
 	// since this fallback should only happen on EEPROM total failure
-#ifdef MODEL_REPLICATOR2
+/*#ifdef MODEL_REPLICATOR2
 	const static PROGMEM prog_uchar defaultMachineName[] = "Replicat0r 2";
 #else
 	const static PROGMEM prog_uchar defaultMachineName[] = "Replicat0r 1";
-#endif
+#endif*/
+	const static PROGMEM prog_uchar defaultMachineName[] = "Malyan Sys 1";
 
 	if (machineName[0] == 0) {
 	        for(uint8_t i = 0; i < 12; i++) {
@@ -840,13 +841,13 @@ void getPrintTime(uint8_t& hours, uint8_t& minutes) {
     return;
 }
 
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 
 float getPrintSeconds(void){
 	return (float)((int32_t)print_time_hours * (int32_t)3600) + (float)print_time.getCurrentElapsed() / 1000000.0f;
 }
 
-#endif
+//#endif
 
     // legacy tool / motherboard breakout of query commands
 bool processExtruderQueryPacket(const InPacket& from_host, OutPacket& to_host) {
@@ -906,14 +907,14 @@ bool processExtruderQueryPacket(const InPacket& from_host, OutPacket& to_host) {
 	return false;
 }
 
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 
 bool isBuildComplete() {
 	if (( command::isEmpty() ) && ( ! sdcard::playbackHasNext() ))	return true;
 	return false;
 }
 
-#endif
+//#endif
 
 }
 /* footnote 1: due to a protocol change, replicatiorG 0026 and newer can ONLY work with

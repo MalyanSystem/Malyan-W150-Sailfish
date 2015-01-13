@@ -109,6 +109,7 @@ elif (platform == 'mighty_one-2560'):
     # default rev for mighty_one is revE
     board = ARGUMENTS.get('rev', 'reve')
     board_platform = 'mighty_one'
+    build_stats_def = '-DBUILD_STATS'
     max31855 = ARGUMENTS.get('max31855','')
     if max31855 == '1':
         max31855_def = '-DMAX31855'
@@ -195,8 +196,6 @@ flags=[
 	'-DVERSION='+str(int(version[0])*100 + int(version[1])),
 	'-DSTREAM_VERSION='+str(int(version[3])*100 + int(version[4])),
   	'-DVERSION_INTERNAL='+str(int(version[2])),
-        '-DSVN_VERSION='+str(svn_version),
-	'-DSVN_VERSION_STR=\'"'+str(svn_version).zfill(5)+'"\'',
 	'-DVERSION_STR=\'"'+version_str+'"\'',
 	'-D'+board.upper(),
 	broken_def,

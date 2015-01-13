@@ -179,12 +179,12 @@ FORCE_INLINE void stepperAxisSetEnabled(uint8_t axis, bool enabled) {
 
 /// Returns true if we're at a maximum endstop
 FORCE_INLINE bool stepperAxisIsAtMaximum(uint8_t axis) {
-	return (STEPPER_IOPORT_NULL(stepperAxisPorts[axis].maximum)) ? false : (STEPPER_IOPORT_READ(stepperAxisPorts[axis].maximum) ^ stepperAxis[axis].invert_endstop);
+	return (STEPPER_IOPORT_NULL(stepperAxisPorts[axis].maximum)) ? false : 1 ^ (STEPPER_IOPORT_READ(stepperAxisPorts[axis].maximum) ^ stepperAxis[axis].invert_endstop);
 }
 
 /// Returns true if we're at a minimum endstop
 FORCE_INLINE bool stepperAxisIsAtMinimum(uint8_t axis) {
-	return (STEPPER_IOPORT_NULL(stepperAxisPorts[axis].minimum)) ? false : (STEPPER_IOPORT_READ(stepperAxisPorts[axis].minimum) ^ stepperAxis[axis].invert_endstop);
+	return (STEPPER_IOPORT_NULL(stepperAxisPorts[axis].minimum)) ? false : 1 ^ (STEPPER_IOPORT_READ(stepperAxisPorts[axis].minimum) ^ stepperAxis[axis].invert_endstop);
 }
 
 /// Makes a step, but checks if an endstop is triggered first, if it is, the

@@ -7,14 +7,13 @@
 #include <avr/pgmspace.h>
 #include "Configuration.hh"
 #endif
-
+typedef unsigned char PROGMEM 	prog_uchar;
+typedef char PROGMEM 	prog_char;
 namespace eeprom {
 
 void init();
 
-#if defined(ERASE_EEPROM_ON_EVERY_BOOT) || defined(EEPROM_MENU_ENABLE)
         void erase();
-#endif
 
 #ifdef EEPROM_MENU_ENABLE
 	bool saveToSDFile(const prog_char *filename);

@@ -5,9 +5,9 @@
 
 #include "Version.hh"
 #include <avr/eeprom.h>
+#include <avr/wdt.h>
 
 #ifdef EEPROM_MENU_ENABLE
-	#include <avr/wdt.h>
 	#include "SDCard.hh"
 #endif
 
@@ -55,15 +55,15 @@ void init() {
         #define EEPROM_SIZE 0
 #endif
 
+#endif
 //Complete erase of eeprom to 0xFF
 void erase() {
+#define EEPROM_SIZE 4096
         for (uint16_t i = 0; i < EEPROM_SIZE; i ++ ) {
                 eeprom_write_byte((uint8_t*)i, 0xFF);
 		wdt_reset();
 	}
 }
-
-#endif
 
 #ifdef EEPROM_MENU_ENABLE
 

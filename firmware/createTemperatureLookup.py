@@ -47,7 +47,7 @@ class Thermistor:
 
 	def temp(self,adc):
 		"Convert ADC reading into a temperature in Celcius"
-		v = adc * self.vadc / 1024          # convert the 10 bit ADC value to a voltage
+		v = adc * self.vadc / 4096          # convert the 10 bit ADC value to a voltage
 		r = self.rs * v / (self.vs - v)     # resistance of thermistor
 		return (self.beta / log(r / self.k)) - 273.15        # temperature
 
@@ -55,7 +55,7 @@ class Thermistor:
 		"Convert a temperature into a ADC value"
 		r = self.r0 * exp(self.beta * (1 / (t + 273.15) - 1 / self.t0)) # resistance of the thermistor
 		v = self.vs * r / (self.rs + r)     # the voltage at the potential divider
-		return round(v / self.vadc * 1024)  # the ADC reading
+		return round(v / self.vadc * 4096)  # the ADC reading
 
 def main(argv):
 
@@ -64,8 +64,8 @@ def main(argv):
 	beta = 3947;
 	r1 = 680;
 	r2 = 1600;
-	num_temps = int(20);
-	max_adc = int(1023);
+	num_temps = int(128);
+	max_adc = int(4095);
 	
 	try:
 		opts, args = getopt.getopt(argv, "h", ["help", "r0=", "t0=", "beta=", "r1=", "r2=", "max-adc="])

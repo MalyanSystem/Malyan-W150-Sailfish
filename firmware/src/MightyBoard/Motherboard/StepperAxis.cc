@@ -35,10 +35,10 @@ struct StepperAxisPorts stepperAxisPorts[STEPPER_COUNT] = {
 #ifdef PSTOP_SUPPORT
 	{ X_STEPPER_STEP, X_STEPPER_DIR, X_STEPPER_ENABLE, STEPPER_NULL,  X_STEPPER_MAX },
 #else
-	{ X_STEPPER_STEP, X_STEPPER_DIR, X_STEPPER_ENABLE, X_STEPPER_MIN, X_STEPPER_MAX },
+	{ X_STEPPER_STEP, X_STEPPER_DIR, X_STEPPER_ENABLE, STEPPER_NULL, X_STEPPER_MAX },
 #endif
-	{ Y_STEPPER_STEP, Y_STEPPER_DIR, Y_STEPPER_ENABLE, Y_STEPPER_MIN, Y_STEPPER_MAX },
-	{ Z_STEPPER_STEP, Z_STEPPER_DIR, Z_STEPPER_ENABLE, Z_STEPPER_MIN, Z_STEPPER_MAX },
+	{ Y_STEPPER_STEP, Y_STEPPER_DIR, Y_STEPPER_ENABLE, STEPPER_NULL, Y_STEPPER_MAX },
+	{ Z_STEPPER_STEP, Z_STEPPER_DIR, Z_STEPPER_ENABLE, Z_STEPPER_MAX, STEPPER_NULL },
 	{ A_STEPPER_STEP, A_STEPPER_DIR, A_STEPPER_ENABLE, STEPPER_NULL,  STEPPER_NULL	},
 	{ B_STEPPER_STEP, B_STEPPER_DIR, B_STEPPER_ENABLE, STEPPER_NULL,  STEPPER_NULL	}
 };
@@ -65,7 +65,7 @@ void stepperAxisInit(bool hard_reset) {
 		endstops_invert = eeprom::getEeprom8(eeprom_offsets::ENDSTOP_INVERSION, 0);
 #ifdef PSTOP_SUPPORT
 		pstop_enable = eeprom::getEeprom8(eeprom_offsets::PSTOP_ENABLE, 0);
-		if ( pstop_enable != 1 ) {
+/*		if ( pstop_enable != 1 ) {
 			stepperAxisPorts[X_AXIS].minimum.port  = xMin.port;
 			stepperAxisPorts[X_AXIS].minimum.iport = xMin.iport;
 			stepperAxisPorts[X_AXIS].minimum.pin   = xMin.pin;
@@ -77,6 +77,7 @@ void stepperAxisInit(bool hard_reset) {
 			stepperAxisPorts[X_AXIS].minimum.pin   = 0;
 			stepperAxisPorts[X_AXIS].minimum.ddr   = 0;
 		}
+*/
 #endif
 	}
 

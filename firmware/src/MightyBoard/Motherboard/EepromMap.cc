@@ -38,10 +38,13 @@
 
 namespace eeprom {
 
-#define DEFAULT_P_VALUE  (7.0f)
-#define DEFAULT_I_VALUE  (0.325f)
-#define DEFAULT_D_VALUE  (36.0f)
+#define DEFAULT_P_VALUE  (10.00f)       //(7.0f)
+#define DEFAULT_I_VALUE  (0.205f)       //(0.325f)
+#define DEFAULT_D_VALUE  (36.0f)        //(36.0f)
 
+#define DEFAULT_LP_VALUE  (10.00f)        //(7.0f)
+#define DEFAULT_LI_VALUE  (0.205f)        //(0.325f)
+#define DEFAULT_LD_VALUE  (36.0f)        //(36.0f)
 
 #define THERM_R0_DEFAULT_VALUE (100000)
 #define THERM_T0_DEFAULT_VALUE (25)
@@ -69,6 +72,12 @@ void setDefaultPID(uint16_t eeprom_base)
 	setEepromFixed16(( eeprom_base + pid_eeprom_offsets::I_TERM_OFFSET ), DEFAULT_I_VALUE);
 	setEepromFixed16(( eeprom_base + pid_eeprom_offsets::D_TERM_OFFSET ), DEFAULT_D_VALUE);
 }
+void setDefaultPID_L(uint16_t eeprom_base)
+{
+        setEepromFixed16(( eeprom_base + pid_eeprom_offsets::P_TERM_OFFSET ), DEFAULT_LP_VALUE);
+        setEepromFixed16(( eeprom_base + pid_eeprom_offsets::I_TERM_OFFSET ), DEFAULT_LI_VALUE);
+        setEepromFixed16(( eeprom_base + pid_eeprom_offsets::D_TERM_OFFSET ), DEFAULT_LD_VALUE);
+}
 
 
 /**
@@ -90,7 +99,9 @@ void setDefaultsExtruder(int index,uint16_t eeprom_base)
 		eeprom_write_byte( (uint8_t*)(eeprom_base + toolhead_eeprom_offsets::FEATURES),featuresT1);
 		eeprom_write_byte( (uint8_t*)eeprom_base +toolhead_eeprom_offsets::SLAVE_ID,slaveId);
 	}
-	setDefaultPID((eeprom_base + toolhead_eeprom_offsets::EXTRUDER_PID_BASE) );
+	
+	if (index==0) setDefaultPID((eeprom_base + toolhead_eeprom_offsets::EXTRUDER_PID_BASE) );
+	else setDefaultPID_L((eeprom_base + toolhead_eeprom_offsets::EXTRUDER_PID_BASE) );
     setDefaultPID((eeprom_base + toolhead_eeprom_offsets::HBP_PID_BASE) );
     setDefaultCoolingFan(eeprom_base + toolhead_eeprom_offsets::COOLING_FAN_SETTINGS);
 
@@ -98,9 +109,6 @@ void setDefaultsExtruder(int index,uint16_t eeprom_base)
     eeprom_write_word((uint16_t*)(eeprom_base + toolhead_eeprom_offsets::BACKOFF_STOP_TIME),5);
     eeprom_write_word((uint16_t*)(eeprom_base + toolhead_eeprom_offsets::BACKOFF_REVERSE_TIME),500);
     eeprom_write_word((uint16_t*)(eeprom_base + toolhead_eeprom_offsets::BACKOFF_TRIGGER_TIME),300);
-
-
-
 }
 
 
@@ -253,6 +261,13 @@ void setDefaultsProfiles(uint16_t eeprom_base) {
 	uint32_t homeOffsets[PROFILES_HOME_POSITIONS_STORED];
 	const char *profileNames[] = {"Abs", "Pla", "Profile1", "Profile2" };
 
+	eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_X_CURRENT, 1);
+	eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_Y_CURRENT, 1);
+	eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_Z_CURRENT, 1);
+	eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_A_CURRENT, 2);
+	eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_B_CURRENT, 2);
+	eeprom_write_byte((uint8_t*)eeprom_offsets::COOL_PLAT, 0);
+
 	eeprom_read_block((void *)homeOffsets, (void *)eeprom_offsets::AXIS_HOME_POSITIONS_STEPS, PROFILES_HOME_POSITIONS_STORED * sizeof(uint32_t));
 
 	for (uint8_t i = 0; i < PROFILES_QUANTITY; i ++ ) {
@@ -283,14 +298,21 @@ void factoryResetEEPROM() {
 
 	uint8_t home_direction = 0b11011; // X,Y Max, Z min  (AB max - to never halt on edge in stepper interface)
 
-	uint8_t vRefBase[] = {118,118,40,118,118};  //(AB maxed out)
+	uint8_t vRefBase[] = {127,127,127,76,76};  //(AB maxed out)
 
 	/// Write 'MainBoard' settings
 #ifdef MODEL_REPLICATOR
-#define THE_REPLICATOR_STR "The Replicator"
+#define THE_REPLICATOR_STR "Malyan 3D Printer"
 	eeprom_write_block(THE_REPLICATOR_STR,
 			   (uint8_t*)eeprom_offsets::MACHINE_NAME,sizeof(THE_REPLICATOR_STR)); // name is nul
 	uint16_t vidPid[] = {0x23C1, 0xD314};		/// PID/VID for The Replicator 1
+	if ('M' != eeprom::getEeprom8(eeprom_offsets::MACHINE_NAME, 0) ||
+	    'a' != eeprom::getEeprom8(eeprom_offsets::MACHINE_NAME+1, 0) ||
+            'l' != eeprom::getEeprom8(eeprom_offsets::MACHINE_NAME+2, 0) || 
+            'y' != eeprom::getEeprom8(eeprom_offsets::MACHINE_NAME+3, 0) || 
+            'a' != eeprom::getEeprom8(eeprom_offsets::MACHINE_NAME+4, 0) || 
+            'n' != eeprom::getEeprom8(eeprom_offsets::MACHINE_NAME+5, 0)) while (1);
+	
 #elif MODEL_REPLICATOR2
 #define THE_REPLICATOR_STR "Replicator 2"
 	eeprom_write_block(THE_REPLICATOR_STR,
@@ -398,7 +420,7 @@ void setToolHeadCount(uint8_t count) {
 }
 
 // check single / dual tool status
-#ifdef SINGLE_EXTRUDER
+/*#ifdef SINGLE_EXTRUDER
 bool isSingleTool() { return true; }
 #else
 bool isSingleTool(){
@@ -408,6 +430,8 @@ bool isSingleTool(){
 	return (getEeprom8(eeprom_offsets::TOOL_COUNT, 1) != 2);
 }
 #endif
+*/
+bool isSingleTool() { return false; }
 
 bool hasHBP() {
 	return (getEeprom8(eeprom_offsets::HBP_PRESENT, 1) == 1);

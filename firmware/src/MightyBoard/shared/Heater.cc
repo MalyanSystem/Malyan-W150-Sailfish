@@ -24,7 +24,7 @@
 #include "Motherboard.hh"
 
 /// Offset to compensate for range clipping and bleed-off
-#define HEATER_OFFSET_ADJUSTMENT 0
+#define HEATER_OFFSET_ADJUSTMENT 20
 
 /// PID bypass: If the set point is more than this many degrees over the
 ///             current temperature, bypass the PID loop altogether.
@@ -335,7 +335,7 @@ void Heater::manage_temperature() {
 		bypassing_PID = false;
 		pid.reset_state();
 	}
-	else if ( !bypassing_PID && (delta > PID_BYPASS_DELTA + 10) ) {
+	else if ( !bypassing_PID && (delta > PID_BYPASS_DELTA + 20) ) {	//yongzong
 		bypassing_PID = true;
 	}
 
@@ -353,7 +353,7 @@ void Heater::manage_temperature() {
 #endif
 			// clamp value
 			if (mv < 0) mv = 0;
-			else if (mv > 255) mv = 255;
+			else if (mv > 220) mv = 220;
 		}
 		set_output(mv);
 	}

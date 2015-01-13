@@ -39,26 +39,16 @@ public:
     SoftI2cManager();
     static SoftI2cManager& getI2cManager() {return i2cManager; }
     
-
+  uint8_t start(uint8_t addressRW);
+  void stop(void);
   
   /** init bus */
   void init();
   
-  /** read a byte and send Ack if last is false else Nak to terminate read */
-  uint8_t read(bool last, const Pin &sdaPin);
-  
-  /** send new address and read/write bit without stop */
-  uint8_t restart(uint8_t addressRW, const Pin &sdaPin);
-  
-  /** issue a start condition for i2c address with read/write bit */
-  uint8_t start(uint8_t addressRW, const Pin &sdaPin);
-  
-  /** issue a stop condition */
-  void stop(void);
-  
   /** write byte and return true for Ack or false for Nak */
   bool write(uint8_t b, const Pin &sdaPin);
-    
+  bool writepot(uint8_t b);
+
 private:
     Pin sdaPins[MAX_STEPPERS];
     uint8_t numPins;

@@ -569,7 +569,7 @@ void FilamentScreen::startMotor(){
 	//So we don't prime after a pause
 	command::pauseUnRetractClear();
 
-	int32_t interval = 300000000;  // 5 minutes
+	int32_t interval = 30000000;  // 5 minutes=300000000 ; 10 second=10000000
 	int32_t steps = interval / 3250;
 	if ( forward ) steps *= -1;
 	Point target = Point(0,0,0,0,0);
@@ -607,10 +607,8 @@ void FilamentScreen::stopMotor(){
 
 void FilamentScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
     	if ( filamentState == FILAMENT_WAIT ) {
-
 		/// if extruder has reached hot temperature, start extruding
-		if ( Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().has_reached_target_temperature() ) {
-
+		if (Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().has_reached_target_temperature() ) {
 			int16_t setTemp = (int16_t)(Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().get_set_temperature());
 			/// check for externally manipulated temperature (eg by RepG)
 			if ( setTemp < filamentTemp[toolID] ) {
@@ -619,7 +617,6 @@ void FilamentScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 				MenuBadness(EXTEMP_CHANGE_MSG);
 				return;
 			}
-
 			filamentState++;
 			needsRedraw= true;
 			RGB_LED::setDefaultColor();
@@ -1009,7 +1006,7 @@ void JogModeScreen::jog(ButtonArray::ButtonName direction) {
 	uint8_t dummy;
 	Point position = steppers::getStepperPosition(&dummy);
 
-	int32_t interval = 500;
+	int32_t interval = 250;
 	int32_t steps = 20;
 
 	switch(jogDistance) {
@@ -1063,6 +1060,7 @@ void JogModeScreen::jog(ButtonArray::ButtonName direction) {
 	}
 	else if (JogModeScreen == JOG_MODE_Z)
 	{
+		interval = 100;
 		switch(direction) {
 		case ButtonArray::LEFT:
 			JogModeScreen = JOG_MODE_Y;
@@ -1824,20 +1822,20 @@ void PreheatSettingsMenu::handleCounterUpdate(uint8_t index, int8_t up) {
 	switch (index) {
 	case 1:
 		// update right counter
-		counterRight += up;
+		counterRight += 5*up;	//yongzong//up;
 		if ( counterRight > MAX_VALID_TEMP )
 			counterRight = MAX_VALID_TEMP;
 		break;
 	case 2:
 		if ( !singleTool ) {
 			// update left counter
-			counterLeft += up;
+			counterLeft += 5*up;	//yongzong//up;
 			if ( counterLeft > MAX_VALID_TEMP )
 				counterLeft = MAX_VALID_TEMP;
 		}
 		else if ( hasHBP ) {
 			// update platform counter
-			counterPlatform += up;
+			counterPlatform += 5*up;	//yongzong//up;
 			if (counterPlatform > MAX_HBP_TEMP )
 				counterPlatform = MAX_HBP_TEMP;
 		}
@@ -1845,7 +1843,7 @@ void PreheatSettingsMenu::handleCounterUpdate(uint8_t index, int8_t up) {
 	case 3:
 		// update platform counter
 		if ( !singleTool && hasHBP ) {
-			counterPlatform += up;
+			counterPlatform += 5*up;	//yongzong//up;
 			if ( counterPlatform > MAX_HBP_TEMP )
 				counterPlatform = MAX_HBP_TEMP;
 		}
@@ -1882,7 +1880,7 @@ void PreheatSettingsMenu::handleSelect(uint8_t index) {
 
 
 ResetSettingsMenu::ResetSettingsMenu() :
-	Menu(0, (uint8_t)4) {
+	Menu(0, (uint8_t)5) {
 	reset();
 }
 
@@ -1908,6 +1906,8 @@ void ResetSettingsMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 	case 3:
 		msg = YES_MSG;
 		break;
+	case 4:msg = ERASE_MSG;
+		break;
 	}
 	lcd.writeFromPgmspace(msg);
 }
@@ -1916,10 +1916,16 @@ void ResetSettingsMenu::handleSelect(uint8_t index) {
 	if ( index == 3 ) {
 		// Reset setings to defaults
 		eeprom::factoryResetEEPROM();
-		Motherboard::getBoard().reset(false);
+		Motherboard::getBoard().reset(true);
 	}
-	else
-		interface::popScreen();
+	else if (index == 4)
+	{
+		eeprom::erase();
+                interface::popScreen();
+                host::stopBuildNow();
+		Motherboard::getBoard().reset(true);
+	}
+	else	interface::popScreen();
 }
 
 void writeProfileToEeprom(uint8_t pIndex, uint8_t *pName, uint32_t *homeOffsets,
@@ -2194,6 +2200,7 @@ void ProfileDisplaySettingsMenu::drawItem(uint8_t index, LiquidCrystalSerial& lc
 void ProfileDisplaySettingsMenu::handleSelect(uint8_t index) {
 }
 
+#ifdef EEPROM_MENU_ENABLE
 EepromMenu::EepromMenu() :
 	Menu(0, (uint8_t)3) {
 	reset();
@@ -2357,6 +2364,7 @@ void EepromMenu::notifyButtonPressed(ButtonArray::ButtonName button) {
 
 	Menu::notifyButtonPressed(button);
 }
+#endif
 
 void HomeOffsetsModeScreen::reset() {
 	cli();
@@ -2412,12 +2420,12 @@ void HomeOffsetsModeScreen::notifyButtonPressed(ButtonArray::ButtonName button) 
 		break;
 	case ButtonArray::UP:
 		// increment less
-		homePosition[currentIndex] += 1;
+		homePosition[currentIndex] += 50;
 		valueChanged = true;
 		break;
 	case ButtonArray::DOWN:
 		// decrement less
-		homePosition[currentIndex] -= 1;
+		homePosition[currentIndex] -= 50;
 		valueChanged = true;
 		break;
 	default:
@@ -2607,11 +2615,11 @@ void ChangeTempScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
 		return;
 	case ButtonArray::UP:
 		// increment
-		temp += 1;
+		temp += 5;
 		break;
 	case ButtonArray::DOWN:
 		// decrement
-		temp -= 1;
+		temp -= 5;
 		break;
 	default:
 		return;
@@ -3031,8 +3039,8 @@ UtilitiesMenu::UtilitiesMenu() :
 
 void UtilitiesMenu::resetState(){
 	singleTool = eeprom::isSingleTool();
-	itemCount = 18;
-	if ( singleTool ) --itemCount;
+	itemCount = 15;
+	//if ( singleTool ) --itemCount;
 	stepperEnable = ( axesEnabled ) ? false : true;
 }
 
@@ -3081,24 +3089,15 @@ void UtilitiesMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 		break;
 		// ------ next screen ------
 	case 12:
-		msg = blinkLED ? LED_STOP_MSG : LED_BLINK_MSG;
-		break;
-	case 13:
 		msg = singleTool ? RESET_MSG : NOZZLES_MSG;
 		break;
+	case 13:
+		msg = singleTool ? VERSION_MSG : RESET_MSG;
+		break;
 	case 14:
-		msg = singleTool ? EEPROM_MSG : RESET_MSG;
-		break;
-	case 15:
-		msg = singleTool ? VERSION_MSG : EEPROM_MSG;
-		break;
-		// ------ next screen ------
-	case 16:
-		msg = singleTool ? EXIT_MSG : VERSION_MSG;
-		break;
-	case 17:
 		msg = EXIT_MSG;
 		break;
+		// ------ next screen ------
 	}
 	lcd.writeFromPgmspace(msg);
 }
@@ -3157,11 +3156,6 @@ void UtilitiesMenu::handleSelect(uint8_t index) {
 		stepperEnable = !stepperEnable;
 		break;
 	case 12:
-		blinkLED = !blinkLED;
-		RGB_LED::setLEDBlink(blinkLED ? 150 : 0);
-		lineUpdate = true;
-		break;
-	case 13:
 		if ( singleTool ) interface::pushScreen(&resetSettingsMenu);
 #ifndef SINGLE_EXTRUDER
 #ifdef NOZZLE_CALIBRATION_SCREEN
@@ -3171,29 +3165,15 @@ void UtilitiesMenu::handleSelect(uint8_t index) {
 #endif
 #endif
 		break;
-	case 14:
-		if ( singleTool ) interface::pushScreen(&eepromMenu);
-		else interface::pushScreen(&resetSettingsMenu);
-		break;
-	case 15:
-		//Eeprom Menu
-		if ( !singleTool )
-			interface::pushScreen(&eepromMenu);
-		else
+	case 13:
+		if ( singleTool )
 		{
 			splashScreen.hold_on = true;
-			interface::pushScreen(&splashScreen);
+                        interface::pushScreen(&splashScreen);
 		}
+		else interface::pushScreen(&resetSettingsMenu);
 		break;
-	case 16:
-		if ( !singleTool ) {
-			splashScreen.hold_on = true;
-			interface::pushScreen(&splashScreen);
-		}
-		else
-			interface::popScreen();
-		break;
-	case 17:
+	case 14:
 		interface::popScreen();
 		break;
 	}
@@ -3242,6 +3222,7 @@ SettingsMenu::SettingsMenu() :
 #ifdef DITTO_PRINT
 		    +1
 #endif
+	+5	//yongzong: adding motor current control
 		) {
 	reset();
 }
@@ -3269,6 +3250,7 @@ void SettingsMenu::resetState(){
 
 void SettingsMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 	bool test;
+	uint8_t current;
 	const prog_uchar *msg;
 	uint8_t extra = 3;
 	uint8_t selIndex = selectIndex;
@@ -3362,13 +3344,46 @@ void SettingsMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 		msg = PSTOP_ENABLE_MSG;
 		test = pstopEnabled;
 		break;
+	case 13:lcd.moveWriteFromPgmspace(1, row, COOL_PLAT_MSG);
+                lcd.moveWriteFromPgmspace(14 + extra, row, eeprom::getEeprom8(eeprom_offsets::COOL_PLAT, 0) ? YES_MSG : NO_MSG);
+                return;
+	case 14:
+		lcd.moveWriteFromPgmspace(1, row, STEPXCURRENT);
+                lcd.setCursor(14 + extra, row);
+		current=eeprom::getEeprom8(eeprom_offsets::STEPPER_X_CURRENT, 0);
+		if (current==2) lcd.writeFromPgmspace(HIGHCURRENT);
+		else if (current==1) lcd.writeFromPgmspace(MIDCURRENT);
+		else lcd.writeFromPgmspace(LOWCURRENT);
+		return;
+	case 15:
+                lcd.moveWriteFromPgmspace(1, row, STEPYCURRENT);
+                lcd.setCursor(14 + extra, row);
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_Y_CURRENT, 0);
+                if (current==2) lcd.writeFromPgmspace(HIGHCURRENT);
+                else if (current==1) lcd.writeFromPgmspace(MIDCURRENT);
+                else lcd.writeFromPgmspace(LOWCURRENT);
+                return;
+	case 16:
+                lcd.moveWriteFromPgmspace(1, row, STEPZCURRENT);
+                lcd.setCursor(14 + extra, row);
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_Z_CURRENT, 0);
+                if (current==2) lcd.writeFromPgmspace(HIGHCURRENT);
+                else if (current==1) lcd.writeFromPgmspace(MIDCURRENT);
+                else lcd.writeFromPgmspace(LOWCURRENT);
+                return;
+	case 17:
+                lcd.moveWriteFromPgmspace(1, row, STEPACURRENT);
+                lcd.setCursor(14 + extra, row);
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_A_CURRENT, 0);
+                lcd.write(current+'1');
+                return;
 	}
 	lcd.moveWriteFromPgmspace(1, row, msg);
 	lcd.moveWriteFromPgmspace(14 + extra, row, test ? ON_MSG : OFF_MSG);
 }
 
 void SettingsMenu::handleCounterUpdate(uint8_t index, int8_t up) {
-
+	uint8_t current;
 #ifndef DITTO_PRINT
 	index++;
 #endif
@@ -3433,6 +3448,37 @@ void SettingsMenu::handleCounterUpdate(uint8_t index, int8_t up) {
 	case 12:
 		pstopEnabled = !pstopEnabled;
 		return;
+	case 13:
+		current=eeprom::getEeprom8(eeprom_offsets::COOL_PLAT, 0);
+		if (current!=0) current=0;
+		else current=1;
+		eeprom_write_byte((uint8_t*)eeprom_offsets::COOL_PLAT, current);
+                return;
+	case 14:
+		current=eeprom::getEeprom8(eeprom_offsets::STEPPER_X_CURRENT, 0);
+		current++;
+		if (current>=3) current=0;
+		eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_X_CURRENT, current);
+		return;
+	case 15:
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_Y_CURRENT, 0);
+                current++;
+                if (current>=3) current=0;
+		eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_Y_CURRENT, current);
+                return;
+	case 16:
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_Z_CURRENT, 0);
+                current++;
+                if (current>=3) current=0;
+		eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_Z_CURRENT, current);
+                return;
+	case 17:
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_A_CURRENT, 0);
+		current+=up;
+		if (current>=250) current=4;
+		else if (current>=5) current=0;
+		eeprom_write_byte((uint8_t*)eeprom_offsets::STEPPER_A_CURRENT, current);
+                return;
 	}
 }
 

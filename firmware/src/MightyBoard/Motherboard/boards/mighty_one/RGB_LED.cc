@@ -46,6 +46,7 @@ void init(){
  //  		ones indicate on, zeros indicate off 
  void setBrightness(uint8_t Channel, uint8_t level, uint8_t LEDs)
  {
+return;
      //uint8_t data[4] = {LED_REG_SELECT, 0, 0 , level};
      uint8_t data1[2] = {LED_REG_SELECT, 0};
      uint8_t data2[2] = {0, level};
@@ -85,6 +86,7 @@ void init(){
      uint8_t data1[2] = {LED_REG_SELECT, 0};
      uint8_t data2[2] = {0 , rate};
  	
+return;
  	// set pwm for select channel
  	if (Channel == LED_CHANNEL1){
  		data2[0] = LED_REG_PSC0;
@@ -114,6 +116,7 @@ void init(){
  {
  	uint8_t data[2] = {LED_REG_SELECT, 0};
  	
+return;
  	if(enable)
  	// clear past select data and turn LEDs full on
  		data[1] = (LEDSelect & ~LEDs) | (LED_ON & LEDs);
@@ -145,7 +148,7 @@ void errorSequence(){
 }
 
 void setDefaultColor(){
-
+return;
 	clear();
 		 
 	 // set frequency to slowest and duty cyle to zero (off)
@@ -196,13 +199,14 @@ void setDefaultColor(){
 }
 
 void setLEDBlink(uint8_t rate){
-		
+return;
 	blinkRate = rate;
 	setDefaultColor();
 }
 
     // set LED color and store to EEPROM "custom" color area
 void setCustomColor(uint8_t red, uint8_t green, uint8_t blue){
+return;
 	eeprom::setCustomColor(red, green, blue);
 	LEDEnabled = true;
 	setColor(red, green, blue, true);
@@ -212,7 +216,7 @@ void setCustomColor(uint8_t red, uint8_t green, uint8_t blue){
 
 // wiggly: set a three value color using a 2 value driver (+ ON/OFF channel)
 void setColor(uint8_t red, uint8_t green, uint8_t blue, bool clearOld){
-
+return;
 	if ( !LEDEnabled )
 		return;
 

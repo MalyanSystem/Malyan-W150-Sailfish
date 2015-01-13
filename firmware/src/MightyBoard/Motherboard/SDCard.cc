@@ -41,7 +41,7 @@ namespace sdcard {
 #ifndef BROKEN_SD
 volatile bool mustReinit = true;
 #else
-static bool mustReinit = false;
+volatile bool mustReinit = false;
 #endif
 
 SdErrorCode sdAvailable = SD_ERR_NO_CARD_PRESENT;

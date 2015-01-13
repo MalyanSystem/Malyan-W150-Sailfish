@@ -38,7 +38,7 @@
 #ifdef MODEL_REPLICATOR
 
 const TempTable default_therm_table PROGMEM = {
-  {1, 841},
+/*  {1, 841},
   {54, 255},
   {107, 209},
   {160, 184},
@@ -57,7 +57,27 @@ const TempTable default_therm_table PROGMEM = {
   {849, 61},
   {902, 50},
   {955, 34},
-  {1008, 3}
+  {1008, 3}*/
+   {1, 437},
+   {37, 155},
+   {73, 123},
+   {109, 105},
+   {145, 93},
+   {181, 84},
+   {217, 75},
+   {253, 68},
+   {289, 62},
+   {325, 56},
+   {361, 51},
+   {397, 45},
+   {433, 40},
+   {469, 34},
+   {505, 28},
+   {541, 22},
+   {577, 15},
+   {613, 6},
+   {649, -4},
+   {685, -29}
 };
 
 #define THERMISTOR_TABLE_NUM_TEMPS 20
@@ -237,7 +257,7 @@ float TempReadtoCelsius(int16_t reading, int8_t table_idx, float max_allowed_val
   }
 
   // Interpolate
-  return (float)eb.value + (float)((reading - eb.adc) * (et.value - eb.value)) / (float)(et.adc - eb.adc);
+  return ((float)eb.value + (float)((reading - eb.adc) * (et.value - eb.value)) / (float)(et.adc - eb.adc)  );
 }
 
 }

@@ -26,6 +26,7 @@
 #include "EepromMap.hh"
 #include "Eeprom.hh"
 #include <avr/eeprom.h>
+#include <avr/pgmspace.h>
 
 #include "Steppers.hh"
  
@@ -360,7 +361,8 @@ const uint16_t tune_sailfish_startup[] PROGMEM = {
 //Plays a tune given a tune id
 
 void playTune(uint8_t tuneid) {
-	const prog_uint16_t *tunePtr = NULL;
+	//const prog_uint16_t *tunePtr = NULL;
+	PROGMEM  const uint16_t *tunePtr = NULL;
 
 	switch ( tuneid ) {
 		case TUNE_ERROR:

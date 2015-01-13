@@ -30,11 +30,11 @@ void Cutoff::init()
 	CUTOFF_SR_CHECK.setValue(false);
 	CUTOFF_SR_CHECK.setDirection(false);
  
-	if (CUTOFF_PRESENT)
+/*	if (CUTOFF_PRESENT)
 		enable();
 	else
 		disable();
-		
+*/		
 	noiseCount = 0;
 	cutoffCount = 0;
 	alarmRun = false;

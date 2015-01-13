@@ -7,6 +7,8 @@
 #include <avr/pgmspace.h>
 #include "Pin.hh"
 
+typedef unsigned char PROGMEM 	prog_uchar;
+
 // commands
 #define LCD_CLEARDISPLAY 0x01
 #define LCD_RETURNHOME 0x02

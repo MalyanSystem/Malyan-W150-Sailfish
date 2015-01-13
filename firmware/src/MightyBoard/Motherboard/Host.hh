@@ -111,7 +111,7 @@ void startPrintTime();
 /// stop print timer and  update local variables
 void stopPrintTime();
 
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 
 /// return true if the build has completed (either from USB or SD card)
 bool isBuildComplete();
@@ -119,7 +119,7 @@ bool isBuildComplete();
 /// return total print time in units of seconds
 float getPrintSeconds();
 
-#endif
+//#endif
 
 }
 

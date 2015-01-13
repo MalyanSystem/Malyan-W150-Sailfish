@@ -38,8 +38,22 @@ void DigiPots::init(const uint8_t idx) {
 
 void DigiPots::resetPots()
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winline"
+	    SoftI2cManager i2cPots = SoftI2cManager::getI2cManager();
+#pragma GCC diagnostic pop
+
     potValue = eeprom::getEeprom8(eeprom_base + eeprom_pot_offset, 0);
-    setPotValue(potValue);
+    if (eeprom_pot_offset<=2) setPotValue(100);
+    else
+    {
+        if (eeprom_pot_offset == 4) return;	//ignore B-axis
+	/*i2cPots.start(0b01011110 | I2C_WRITE);
+	potValue = eeprom::getEeprom8(eeprom_base + eeprom_pot_offset, 0);
+	i2cPots.writepot(potValue);
+	i2cPots.stop();*/
+	setPotValue(127);
+    }
 }
 
 void DigiPots::setPotValue(const uint8_t val)
@@ -49,26 +63,53 @@ void DigiPots::setPotValue(const uint8_t val)
     SoftI2cManager i2cPots = SoftI2cManager::getI2cManager();
 #pragma GCC diagnostic pop
 
-#ifdef DIGI_POT_WRITE_VERIFICATION
-    uint8_t i = 0, actualDigiPotValue;
-    do
-    {
-#endif
-	i2cPots.start(0b01011110 | I2C_WRITE, pot_pin);
-	if ( eeprom_pot_offset == Z_AXIS ) potValue = val > DIGI_POT_MAX_Z ? DIGI_POT_MAX_Z : val;
-	else			    	   potValue = val > DIGI_POT_MAX_XYAB ? DIGI_POT_MAX_XYAB : val;
-	i2cPots.write(potValue, pot_pin);
-	i2cPots.stop(); 
-
-#ifdef DIGI_POT_WRITE_VERIFICATION
-	i2cPots.start(0b01011111 | I2C_WRITE, pot_pin);
-	actualDigiPotValue = i2cPots.read(true, pot_pin);
-	i2cPots.stop();
-
-	i ++;
-    }
-    while (( i < DIGI_POT_WRITE_VERIFICATION_RETRIES ) && ( actualDigiPotValue != potValue ));
-#endif
+	uint8_t current;
+	if ( eeprom_pot_offset == X_AXIS && potValue >=100) 
+        {
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_X_CURRENT, 0);
+                if (current==2) potValue=60;
+                else if (current==1) potValue=40;
+                else potValue=20;
+        }
+	else if ( eeprom_pot_offset == Y_AXIS && potValue >=100) 
+        {
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_Y_CURRENT, 0);
+                if (current==2) potValue=60;
+                else if (current==1) potValue=40;
+                else potValue=20;
+        }
+	else if ( eeprom_pot_offset == Z_AXIS && potValue >=100) 
+        {
+                current=eeprom::getEeprom8(eeprom_offsets::STEPPER_Z_CURRENT, 0);
+                if (current==2) potValue=60;
+                else if (current==1) potValue=40;
+                else potValue=20;
+        }
+	//if ( eeprom_pot_offset == Z_AXIS ) potValue = val > DIGI_POT_MAX_Z ? DIGI_POT_MAX_Z : val;
+	//else                             potValue = val > DIGI_POT_MAX_XYAB ? DIGI_POT_MAX_XYAB : val;
+	//i2cPots.write(potValue, pot_pin);
+	
+	if ( eeprom_pot_offset == A_AXIS) 
+        {
+		current=eeprom::getEeprom8(eeprom_offsets::STEPPER_A_CURRENT, 0);
+		i2cPots.start(0b01011110 | I2C_WRITE);
+		if (val > 120)
+		{
+			potValue = eeprom::getEeprom8(eeprom_base + eeprom_pot_offset, 0);
+			if (potValue == 127) potValue=76;
+		}
+		else if (val < 40) potValue = 40;
+		else potValue = val;
+		potValue = potValue + current * 5 - 10;
+		i2cPots.writepot(potValue);
+		i2cPots.stop();
+                /*current=eeprom::getEeprom8(eeprom_offsets::STEPPER_A_CURRENT, 0);
+                if (current==2) potValue=60;
+                else if (current==1) potValue=40;
+                else potValue=20;*/
+        }
+	else if (eeprom_pot_offset == B_AXIS) {}
+	else i2cPots.write(potValue, pot_pin);
 }
 
 /// returns the last pot value set

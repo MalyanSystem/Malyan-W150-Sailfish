@@ -38,79 +38,48 @@ SoftI2cManager::SoftI2cManager():
     
 }
 
+uint8_t SoftI2cManager::start(uint8_t addressRW)
+{
+    for(uint8_t i = 0; i < numPins; i++)
+        A_POT_PIN.setValue(false);
+    _delay_us(I2C_DELAY_USEC);
+    sclPin.setValue(false);
+    return writepot(addressRW);
+}
+
+void SoftI2cManager::stop()
+{
+    _delay_us(I2C_DELAY_USEC);
+    sclPin.setValue(true);  
+    _delay_us(I2C_DELAY_USEC);
+    for(uint8_t i = 0; i < numPins; i++)
+        A_POT_PIN.setValue(true);  
+    _delay_us(I2C_DELAY_USEC);
+}
 
 // init pins and set bus high
 void SoftI2cManager::init()
 {
-    for (uint8_t i = 0; i < numPins; i++)
+    for (uint8_t i = 0; i < 3; i++)
     {
-        sdaPins[i].setDirection(true);
+        sdaPins[i].setDirection(false);
         sdaPins[i].setValue(true);
     }
+    sdaPins[3].setDirection(true);
+    sdaPins[3].setValue(true);
     sclPin.setDirection(true);
     sclPin.setValue(true);
-    
 }
 
-//------------------------------------------------------------------------------
-// read a byte and send Ack if last is false else Nak to terminate read
-uint8_t SoftI2cManager::read(bool last, const Pin &sdaPin)
-{
-  uint8_t b = 0;
-  // make sure pullup enabled
-  sdaPin.setValue(true);
-  sdaPin.setDirection(false);
-  // read byte
-  for (uint8_t i = 0; i < 8; i++) {
-    // don't change this loop unless you verify the change with a scope
-    b <<= 1;
-    _delay_us(I2C_DELAY_USEC);
-    sclPin.setValue(true);
-    if (sdaPin.getValue()) b |= 1;
-    sclPin.setValue(false);
-  }
-  // send Ack or Nak
-  sdaPin.setDirection(true);
-  sdaPin.setValue(last);
-  sclPin.setValue(true);
-  _delay_us(I2C_DELAY_USEC);
-  sclPin.setValue(false);
-  sdaPin.setValue(true);
-    
-  return b;
-}
-//------------------------------------------------------------------------------
-// send new address and read/write without stop
-uint8_t SoftI2cManager::restart(uint8_t addressRW, const Pin &sdaPin)
-{
-  sclPin.setValue(true);
-  return start(addressRW, sdaPin);
-}
-//------------------------------------------------------------------------------
-// issue a start condition for i2c address with read/write bit
-uint8_t SoftI2cManager::start(uint8_t addressRW, const Pin &sdaPin)
-{
-    for(uint8_t i = 0; i < numPins; i++)
-        sdaPins[i].setValue(false);
-  _delay_us(I2C_DELAY_USEC);
-  sclPin.setValue(false);
-  return write(addressRW, sdaPin);
-}
-//------------------------------------------------------------------------------
-// issue a stop condition
-void SoftI2cManager::stop()
-{
-  _delay_us(I2C_DELAY_USEC);
-   sclPin.setValue(true);  
-  _delay_us(I2C_DELAY_USEC);
-    for(uint8_t i = 0; i < numPins; i++)
-        sdaPins[i].setValue(true);  
-  _delay_us(I2C_DELAY_USEC);
-}
 //------------------------------------------------------------------------------
 // write byte and return true for Ack or false for Nak
 bool SoftI2cManager::write(uint8_t b, const Pin &sdaPin)
 {
+  if (b==0 || b==20) {sdaPin.setDirection(true);sdaPin.setValue(false);}
+  else if (b==60) {sdaPin.setDirection(true);sdaPin.setValue(true);}
+  else if (b==40) {sdaPin.setDirection(false);sdaPin.setValue(false);}
+  return true;
+
   // write byte
   for (uint8_t m = 0X80; m != 0; m >>= 1) {
     // don't change this loop unless you verivy the change with a scope
@@ -128,3 +97,24 @@ bool SoftI2cManager::write(uint8_t b, const Pin &sdaPin)
    sdaPin.setDirection(true);
    return b == 0;
 }
+
+bool SoftI2cManager::writepot(uint8_t b)
+{
+  // write byte
+  for (uint8_t m = 0X80; m != 0; m >>= 1) {
+      // don't change this loop unless you verivy the change with a scope
+      A_POT_PIN.setValue((m & b) != 0);
+      sclPin.setValue(true);
+      _delay_us(I2C_DELAY_USEC);
+      sclPin.setValue(false);
+  }
+  // get Ack or Nak
+  A_POT_PIN.setValue(true);
+  A_POT_PIN.setDirection(false);
+  sclPin.setValue(true);
+  b = A_POT_PIN.getValue();
+  sclPin.setValue(false);
+  A_POT_PIN.setDirection(true);
+  return b == 0;
+}
+

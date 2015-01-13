@@ -284,7 +284,7 @@ void loadToleranceOffsets() {
 #ifdef MODEL_REPLICATOR2
 #define TOOLHEAD_OFFSET_X 35.0
 #else
-#define TOOLHEAD_OFFSET_X 33.0
+#define TOOLHEAD_OFFSET_X 34.0
 #endif
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
@@ -793,7 +793,7 @@ void setTargetNewExt(const Point& target, int32_t dda_rate, uint8_t relative, fl
 
 /// Start homing
 
-void startHoming(const bool maximums, const uint8_t axes_enabled, const uint32_t us_per_step) {
+void startHoming(const bool maximums, const uint8_t axes_enabled, uint32_t us_per_step) {
 	setSegmentAccelState(false);
 	uint8_t dummy;
 	Point target = getStepperPosition(&dummy);
@@ -804,6 +804,8 @@ void startHoming(const bool maximums, const uint8_t axes_enabled, const uint32_t
 		} else {
 	 		target[i] = (maximums) ? POSITIVE_HOME_POSITION : NEGATIVE_HOME_POSITION;
 			axis_homing[i] = true;
+#define HOMING_RATE	120
+			if (i==2 && us_per_step<HOMING_RATE) us_per_step = HOMING_RATE;//smaller is faster
 			stepperAxis[i].hasHomed = true;
                 }
         }

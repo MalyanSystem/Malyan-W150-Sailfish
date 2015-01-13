@@ -24,7 +24,11 @@ const static PROGMEM prog_uchar CLEAR_MSG[]     =  "                    ";
 
 #define LEVEL_PLATE_LEN 189
 
-
+const static PROGMEM prog_uchar SPLASH1_MSG[] = "   Malyan System    ";
+const static PROGMEM prog_uchar SPLASH2_MSG[] = "--------------------";
+const static PROGMEM prog_uchar SPLASH3_MSG[] = " Desktop 3D Printer ";
+const static PROGMEM prog_uchar SPLASH4_MSG[] = "Firmware Version " VERSION_STR;
+/*
 #ifdef MODEL_REPLICATOR
 const static PROGMEM prog_uchar SPLASH1_MSG[] = "Sailfish Replicator1";
 #if !defined(HEATERS_ON_STEROIDS)
@@ -46,7 +50,7 @@ const static PROGMEM prog_uchar SPLASH2_MSG[] = "      --------      ";
 #endif
 const static PROGMEM prog_uchar SPLASH3_MSG[] = "Thing 32084 r" SVN_VERSION_STR "  ";
 const static PROGMEM prog_uchar SPLASH4_MSG[] = "Firmware Version " VERSION_STR;
-
+*/
 #ifdef STACK_PAINT
 const static PROGMEM prog_uchar SPLASH_SRAM_MSG[] = "Free SRAM ";
 #endif
@@ -113,6 +117,7 @@ const static PROGMEM prog_uchar LEFT_SPACES_MSG[]      = "Left Tool          ";
 const static PROGMEM prog_uchar PLATFORM_SPACES_MSG[]  = "Platform           ";
 const static PROGMEM prog_uchar RESET1_MSG[]           = "Restore factory";
 const static PROGMEM prog_uchar RESET2_MSG[]           = "settings?";
+const static PROGMEM prog_uchar ERASE_MSG[]           = "FULL ERASE?";
 const static PROGMEM prog_uchar CANCEL_MSG[] = "Cancel this print?";
 const static PROGMEM prog_uchar CANCEL_FIL_MSG[] = "Cancel load/unload?";
 
@@ -163,6 +168,7 @@ const static PROGMEM prog_uchar PAUSE_HEAT_MSG[]	  = "Pause with Heat";
 const static PROGMEM prog_uchar EXTRUDER_HOLD_MSG[]       = "Extruder Hold";
 const static PROGMEM prog_uchar TOOL_OFFSET_SYSTEM_MSG[]  = "Tool Offset Sys";
 const static PROGMEM prog_uchar SD_USE_CRC_MSG[]          = "Check SD reads";
+const static PROGMEM prog_uchar COOL_PLAT_MSG[]           = "Plat. Save Pwr";
 const static PROGMEM prog_uchar PSTOP_ENABLE_MSG[]        = "P-Stop control";
 const static PROGMEM prog_uchar OLD_MSG[]                 = "OLD";
 const static PROGMEM prog_uchar NEW_MSG[]                 = "NEW";
@@ -179,6 +185,14 @@ const static PROGMEM prog_uchar RETURN_TO_MAIN_MSG[]      = "Main Menu";
 const static PROGMEM prog_uchar PRINT_ANOTHER_MSG[]       = "Print Another Copy";
 const static PROGMEM prog_uchar CANNOT_PRINT_ANOTHER_MSG[]= "(Cannot Print Copy)";
 
+const static PROGMEM prog_uchar STEPXCURRENT[]	= "X-axis torque";
+const static PROGMEM prog_uchar STEPYCURRENT[]  = "Y-axis torque";
+const static PROGMEM prog_uchar STEPZCURRENT[]  = "Z-axis torque";
+const static PROGMEM prog_uchar STEPACURRENT[]  = "A-axis torque";
+const static PROGMEM prog_uchar STEPBCURRENT[]  = "B-axis torque";
+const static PROGMEM prog_uchar LOWCURRENT[] = "Low";
+const static PROGMEM prog_uchar MIDCURRENT[] = "Mid";
+const static PROGMEM prog_uchar HIGHCURRENT[] = "Hi ";
 
 const static PROGMEM prog_uchar RED_COLOR_MSG[]    = "RED   ";
 const static PROGMEM prog_uchar ORANGE_COLOR_MSG[] = "ORANGE";
@@ -260,16 +274,18 @@ const static PROGMEM prog_uchar BUILD_TIME2_MSG[]               =  "Print Time: 
 	const static PROGMEM prog_uchar EEPROM_ERASE_MSG[]	= "Erase Eeprom";
 #endif
 
-const static PROGMEM prog_uchar ERROR_STREAM_VERSION[] = "This is not the x3g version I work best with. "
-	"For help see: makerbot.com/help   ";
+const static PROGMEM prog_uchar ERROR_STREAM_VERSION[] = "This is not the x3g version I work best with. ";
 
-#ifdef MODEL_REPLICATOR2
+/*#ifdef MODEL_REPLICATOR2
 const static PROGMEM prog_uchar ERROR_BOT_TYPE[] =
     "I am a Replicator 2.This build is for   another bot. See:   makerbot.com/help";
 #else
 const static PROGMEM prog_uchar ERROR_BOT_TYPE[] =
     "I am a Replicator.  This build is for   another bot. See:   makerbot.com/help";
 #endif
+*/
+const static PROGMEM prog_uchar ERROR_BOT_TYPE[] =
+    "This build is not   compatible.";
 
 #endif //end of default ELSE for US English */
 

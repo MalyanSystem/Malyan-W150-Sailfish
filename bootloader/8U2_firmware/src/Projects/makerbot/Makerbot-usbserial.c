@@ -144,6 +144,14 @@ void SetupHardware(void)
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
 
+	/*CLKPR = 0;
+	CLKSEL0 |= 4;
+	while ((CLKSTA&1) != 1);
+	CLKSEL0 |= 1;
+	PLLCSR |= 2;
+	CLKSEL0 &= ~(0x80);
+	while ((PLLCSR&1) != 1);*/
+
 	/* Hardware Initialization */
 	Serial_Init(9600, false);
 	LEDs_Init();

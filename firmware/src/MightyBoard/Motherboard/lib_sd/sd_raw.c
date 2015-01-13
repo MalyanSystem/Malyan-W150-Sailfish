@@ -258,8 +258,8 @@ uint8_t sd_raw_init(bool use_crc, uint8_t speed)
 	}
     }
 #endif
-
 #if SD_RAW_SDHC
+    uint8_t flag = 0;
     /* check for version of SD card specification */
     response = sd_raw_send_command(CMD_SEND_IF_COND, 0x100 /* 2.7V - 3.6V */ | 0xaa /* test pattern */);
     if((response & (1 << R1_ILL_COMMAND)) == 0)
@@ -268,19 +268,22 @@ uint8_t sd_raw_init(bool use_crc, uint8_t speed)
         sd_raw_rec_byte();
         if((sd_raw_rec_byte() & 0x01) == 0)
 	{
-	    sd_errno = SDR_ERR_VOLTAGE;
-            return 0; /* card operation voltage range doesn't match */
+            flag = 1;
+	    //sd_errno = SDR_ERR_VOLTAGE;
+            //return 0; /* card operation voltage range doesn't match */
 	}
         if(sd_raw_rec_byte() != 0xaa)
 	{
-	    sd_errno = SDR_ERR_PATTERN;
-            return 0; /* wrong test pattern */
+	    flag = 1;
+	    //sd_errno = SDR_ERR_PATTERN;
+            //return 0; /* wrong test pattern */
 	}
 
         /* card conforms to SD 2 card specification */
-        sd_raw_card_type |= (1 << SD_RAW_SPEC_2);
+        if (flag==0) sd_raw_card_type |= (1 << SD_RAW_SPEC_2);
     }
-    else
+    //else
+    if (flag==1)
 #endif
     {
         /* determine SD/MMC card type */

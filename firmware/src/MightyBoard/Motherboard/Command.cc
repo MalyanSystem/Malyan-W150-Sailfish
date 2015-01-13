@@ -97,11 +97,11 @@ uint8_t pausedDigiPots[STEPPER_COUNT] = {0, 0, 0, 0, 0};
 bool pausedFanState;
 
 uint8_t buildPercentage = 101;
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 float startingBuildTimeSeconds;
 uint8_t startingBuildTimePercentage;
 float elapsedSecondsSinceBuildStart;
-#endif
+//#endif
 
 #ifdef DITTO_PRINT
 bool dittoPrinting = false;
@@ -285,8 +285,10 @@ enum {
 };
 /// Action to take when button times out
 uint8_t button_timeout_behavior;
+uint8_t platform_off;
 
 void reset() {
+	platform_off=0;
 	buildPercentage = 101;
         pauseAtZPos(0);
 	pauseAtZPosActivated = false;
@@ -314,11 +316,11 @@ void reset() {
 	else	dittoPrinting = false;
 #endif
 
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 	startingBuildTimeSeconds = 0.0;
 	startingBuildTimePercentage = 0;
 	elapsedSecondsSinceBuildStart = 0.0;
-#endif
+//#endif
 
 #ifdef PSTOP_SUPPORT
 	pstop_triggered = false;
@@ -529,9 +531,11 @@ void restoreDigiPots(void) {
 	}
 }
 
+#ifdef PSTOP_SUPPORT
 static void pstop_incr() {
 	if ( !pstop_okay && ++pstop_move_count > 4 ) pstop_okay = true;
 }
+#endif
 
 // Handle movement comands -- called from a few places
 static void handleMovementCommand(const uint8_t &command) {
@@ -1076,6 +1080,16 @@ void runCommandSlice() {
 		return;
 	}
 
+	//yongzong: Cool at pos 1200 = 1.5 mm * 800 steps/mm
+        if (steppers::getPlannerPosition()[2] > 1200 && platform_off==0 && eeprom::getEeprom8(eeprom_offsets::COOL_PLAT, 0))
+        {
+                if (command::getFilamentLength(0)!=0 || command::getFilamentLength(0)!=0)
+                {       
+                        platform_off=1;
+                        Motherboard::getBoard().getPlatformHeater().set_target_temperature(0);
+                }
+        }
+
 	if (( paused != PAUSE_STATE_NONE && paused != PAUSE_STATE_PAUSED )) {
 		handlePauseState();
 		return;	
@@ -1360,7 +1374,7 @@ void runCommandSlice() {
 					
 					//bool direction = command == HOST_CMD_FIND_AXES_MAXIMUM;
 					mode = HOMING;
-					homing_timeout.start(timeout_s * 1000L * 1000L);
+					homing_timeout.start(timeout_s * 2000L * 1000L);
 					steppers::startHoming(command==HOST_CMD_FIND_AXES_MAXIMUM,
 							flags,
 							feedrate);
@@ -1448,6 +1462,7 @@ void runCommandSlice() {
 					lastFilamentPosition[1] = newPoint[4];
 
 					steppers::definePosition(newPoint, true);
+					steppers::setTargetNew(Point(newPoint[0],newPoint[1],1000), 200, 0, 0);     //yongzong: BUG fix, lost position after M132
 				}
 
 			}else if (command == HOST_CMD_SET_POT_VALUE){
@@ -1533,7 +1548,7 @@ void runCommandSlice() {
 					buildPercentage = pop8();
 					pop8();	// uint8_t ignore; // remove the reserved byte
 					line_number++;
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 					//Set the starting time / percent on the first HOST_CMD_SET_BUILD_PERCENT
 					//with a non zero value sent near the start of the build
 					//We use this to calculate the build time
@@ -1544,7 +1559,7 @@ void runCommandSlice() {
 					if ( buildPercentage > 0 ) {
 						elapsedSecondsSinceBuildStart = host::getPrintSeconds();
 					}
-#endif
+//#endif
 				}
 			} else if (command == HOST_CMD_QUEUE_SONG ) //queue a song for playing
  			{
@@ -1601,16 +1616,16 @@ void runCommandSlice() {
 					uint8_t version_high = pop8();
 					uint8_t version_low = pop8();
 
-					if ( (version_high *100 + version_low) != stream_version ) {
+					/*if ( (version_high *100 + version_low) != stream_version ) {
 						Motherboard::getBoard().errorResponse(ERROR_STREAM_VERSION);
-					}
+					}*/	//yongzong
 					// extra version
 					pop8();
 					// checksum (currently not implemented)
 					pop32();
 					uint16_t bot_type = pop16();
 					// extra bytes
-					if ( bot_type != BOT_TYPE ) Motherboard::getBoard().errorResponse(ERROR_BOT_TYPE);
+					//if ( bot_type != BOT_TYPE ) Motherboard::getBoard().errorResponse(ERROR_BOT_TYPE);	//yongzong
 
 					// eleven extra bytes
 					pop16();
@@ -1641,7 +1656,7 @@ void runCommandSlice() {
 	}
 }
 
-#ifdef MODEL_REPLICATOR2
+//#ifdef MODEL_REPLICATOR2
 
 //Returns the estimated time left for the build in seconds
 //If we can't complete the calculation due to a lack of information, then we return 0
@@ -1664,6 +1679,6 @@ int32_t estimatedTimeLeftInSeconds(void) {
 	return (int32_t)timeLeft;
 }
 
-#endif
+//#endif
 
 }
